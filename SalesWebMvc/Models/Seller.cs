@@ -19,13 +19,14 @@ namespace SalesWebMvc.Models
 
     public Seller(){}
 
-    public Seller(int id, string name, string email, double baseSalary, DateTime birthDate)
+    public Seller(int id, string name, string email, double baseSalary, DateTime birthDate, Departament departament)
     {
       Id = id;
       Name = name;
       Email = email;
       BaseSalary = baseSalary;
       BirthDate = birthDate;
+      Departament = departament;
     }
 
     public void AddSales(SalesRecord sr)
