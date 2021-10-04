@@ -3,7 +3,10 @@ using SalesWebMvc.Models;
 using SalesWebMvc.Models.ViewModels;
 using SalesWebMvc.Services;
 using SalesWebMvc.Services.Exceptions;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace SalesWebMvc.Controllers
 {
@@ -45,14 +48,14 @@ namespace SalesWebMvc.Controllers
     {
       if (id == null)
       {
-        return NotFound();
+        return RedirectToAction(nameof(Error), new { message = "Id not provided"});
       }
 
       var obj = _sellerService.FindById(id.Value);
 
       if (obj == null)
       {
-        return NotFound();
+        return RedirectToAction(nameof(Error), new { message = "Id not found" });
       }
 
 
@@ -67,18 +70,18 @@ namespace SalesWebMvc.Controllers
       return RedirectToAction(nameof(Index));
     }
 
-    public IActionResult Details(int? id)
+    public async Task<IActionResult> Details(int? id)
     {
       if (id == null)
       {
-        return NotFound();
+        return RedirectToAction(nameof(Error), new { message = "Id not provided" });
       }
 
       var obj = _sellerService.FindById(id.Value);
 
       if (obj == null)
       {
-        return NotFound();
+        return RedirectToAction(nameof(Error), new { message = "Id not found" });
       }
 
 
@@ -89,14 +92,14 @@ namespace SalesWebMvc.Controllers
     {
       if (id == null)
       {
-        return NotFound();
+        return RedirectToAction(nameof(Error), new { message = "Id not provided" });
       }
 
       var obj = _sellerService.FindById(id.Value);
 
       if (obj == null)
       {
-        return NotFound();
+        return RedirectToAction(nameof(Error), new { message = "Id not found" });
       }
 
       List<Departament> departaments = _departamentService.FindAll();
@@ -116,7 +119,7 @@ namespace SalesWebMvc.Controllers
     {
       if (id != seller.Id)
       {
-        return BadRequest();
+        return RedirectToAction(nameof(Error), new { message = "Id mismatch" });
       }
 
       try
@@ -124,17 +127,26 @@ namespace SalesWebMvc.Controllers
         _sellerService.Update(seller);
 
       }
-      catch(NotFoundException)
+      catch(ApplicationException e)
       {
-        return NotFound();
-      }
-      catch(DbConcurrencyException)
-      {
-        return BadRequest();
+        return RedirectToAction(nameof(Error), new { message = e.Message });
       }
 
       return RedirectToAction(nameof(Index));
 
+    }
+
+
+    public IActionResult Error(string messsage)
+    {
+      var viewModel = new ErrorViewModel
+      {
+        Message = messsage,
+        //pegando id interno da requisição
+        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+      };
+
+      return View(viewModel);
     }
   }
 }
